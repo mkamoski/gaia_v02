@@ -1,10 +1,13 @@
 using System.Text;
+using System.Diagnostics;
 using gaia_v02.Experiments;
 
 namespace gaia_v02;
 
 public partial class Form1 : Form
 {
+    private string? _lastCsvPath;
+
     public Form1()
     {
         InitializeComponent();
@@ -43,6 +46,11 @@ public partial class Form1 : Form
             // Populate output boxes
             txtSummary.Text = BuildSummary(result, csvPath);
             txtCsv.Text     = string.Join(Environment.NewLine, result.CsvLines);
+
+            // remember CSV path for open buttons
+            _lastCsvPath = csvPath;
+            btnOpenNotepad.Enabled = true;
+            btnOpenSpreadsheet.Enabled = true;
 
             lblStatus.Text      = $"Done – {result.QualCells} cells analysed, CSV saved to {Path.GetFileName(csvPath)}";
             lblStatus.ForeColor = Color.DarkGreen;
@@ -87,6 +95,64 @@ public partial class Form1 : Form
 
         lblStatus.Text      = "Parameters reset to defaults.";
         lblStatus.ForeColor = SystemColors.GrayText;
+    }
+
+    private void BtnOpenNotepad_Click(object? sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_lastCsvPath) || !File.Exists(_lastCsvPath))
+        {
+            MessageBox.Show("No CSV file found. Run an experiment first.", "Open CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            var psi = new ProcessStartInfo("notepad.exe") { Arguments = $"\"{_lastCsvPath}\"", UseShellExecute = true };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to open Notepad: {ex.Message}", "Open CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void BtnOpenSpreadsheet_Click(object? sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_lastCsvPath) || !File.Exists(_lastCsvPath))
+        {
+            MessageBox.Show("No CSV file found. Run an experiment first.", "Open CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        // Try Excel, then LibreOffice/OpenOffice, then fallback to default association
+        try
+        {
+            // Try Excel first
+            try
+            {
+                var p = new ProcessStartInfo("excel.exe") { Arguments = $"\"{_lastCsvPath}\"", UseShellExecute = true };
+                Process.Start(p);
+                return;
+            }
+            catch { /* ignore and try next */ }
+
+            // Try LibreOffice/OpenOffice (soffice) with --calc
+            try
+            {
+                var p2 = new ProcessStartInfo("soffice") { Arguments = $"--calc \"{_lastCsvPath}\"", UseShellExecute = true };
+                Process.Start(p2);
+                return;
+            }
+            catch { /* ignore */ }
+
+            // Fallback: open with default associated application
+            var psi = new ProcessStartInfo(_lastCsvPath) { UseShellExecute = true };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to open spreadsheet application: {ex.Message}", "Open CSV", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     // -----------------------------------------------------------------------

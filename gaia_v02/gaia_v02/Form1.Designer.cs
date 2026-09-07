@@ -70,15 +70,15 @@ namespace gaia_v02
             // grpParams
             grpParams.Text = "Experiment Parameters";
             grpParams.Location = new System.Drawing.Point(12, 12);
-            grpParams.Size = new System.Drawing.Size(1126, 228);
+            grpParams.Size = new System.Drawing.Size(1000, 270);
 
-            // Layout constants
-            const int labelWidth = 200;
+            // Layout constants (adjusted for 1024x768)
+            const int labelWidth = 240;
             const int inputWidth = 120;
-            int leftLabelX = 12, leftInputX = 220;
-            int rightLabelX = 580, rightInputX = 780;
+            int leftLabelX = 12, leftInputX = 260;
+            int rightLabelX = 520, rightInputX = 780;
 
-            int rowY0 = 28, rowGap = 28;
+            int rowY0 = 28, rowGap = 30;
 
             // Row 0
             lblStarCount.Text = "Star Count:";
@@ -226,33 +226,55 @@ namespace gaia_v02
             grpParams.Controls.Add(lblScaleHeightR);
             grpParams.Controls.Add(nudScaleHeightR);
             grpParams.Controls.Add(lblScaleHeightZ);
+
+            // Ensure group box anchors to top,left,right so it stretches horizontally
+            grpParams.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             grpParams.Controls.Add(nudScaleHeightZ);
 
             // Action buttons
-            btnRunExperiment01.Location = new System.Drawing.Point(12, 252);
+            btnRunExperiment01.Location = new System.Drawing.Point(12, grpParams.Bottom + 12);
             btnRunExperiment01.Size = new System.Drawing.Size(200, 34);
             btnRunExperiment01.Text = "▶  Run Experiment 01";
             btnRunExperiment01.Click += BtnRunExperiment01_Click;
 
-            btnResetDefaults.Location = new System.Drawing.Point(222, 252);
+            btnResetDefaults.Location = new System.Drawing.Point(222, grpParams.Bottom + 12);
             btnResetDefaults.Size = new System.Drawing.Size(160, 34);
             btnResetDefaults.Text = "↺  Reset Defaults";
             btnResetDefaults.Click += BtnResetDefaults_Click;
 
-            lblStatus.Location = new System.Drawing.Point(394, 260);
-            lblStatus.Size = new System.Drawing.Size(744, 20);
+            lblStatus.Location = new System.Drawing.Point(404, grpParams.Bottom + 18);
+            lblStatus.Size = new System.Drawing.Size(480, 22);
             lblStatus.Text = "Ready. Set parameters above, then click Run.";
+            lblStatus.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+
+            // Open output buttons
+            btnOpenNotepad = new System.Windows.Forms.Button();
+            btnOpenSpreadsheet = new System.Windows.Forms.Button();
+            btnOpenNotepad.Location = new System.Drawing.Point(900, grpParams.Bottom + 12);
+            btnOpenNotepad.Size = new System.Drawing.Size(110, 34);
+            btnOpenNotepad.Text = "Open (Notepad)";
+            btnOpenNotepad.Click += BtnOpenNotepad_Click;
+            btnOpenNotepad.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
+            btnOpenSpreadsheet.Location = new System.Drawing.Point(768, grpParams.Bottom + 12);
+            btnOpenSpreadsheet.Size = new System.Drawing.Size(120, 34);
+            btnOpenSpreadsheet.Text = "Open (Spreadsheet)";
+            btnOpenSpreadsheet.Click += BtnOpenSpreadsheet_Click;
+            btnOpenSpreadsheet.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             // Summary box
-            lblSummaryTitle.Location = new System.Drawing.Point(12, 296);
-            lblSummaryTitle.Size = new System.Drawing.Size(500, 18);
+            lblSummaryTitle.Location = new System.Drawing.Point(12, btnRunExperiment01.Bottom + 12);
+            lblSummaryTitle.Size = new System.Drawing.Size(500, 20);
             lblSummaryTitle.Text = "Experiment Summary & Insights:";
+            lblSummaryTitle.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
-            txtSummary.Location = new System.Drawing.Point(12, 316);
-            txtSummary.Size = new System.Drawing.Size(1126, 190);
+            txtSummary.Location = new System.Drawing.Point(12, lblSummaryTitle.Bottom + 6);
+            txtSummary.Size = new System.Drawing.Size(1000, 180);
             txtSummary.Multiline = true;
             txtSummary.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             txtSummary.ReadOnly = true;
+            txtSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
 
             // CSV box
             lblCsvTitle.Location = new System.Drawing.Point(12, 516);
@@ -274,6 +296,8 @@ namespace gaia_v02
             Controls.Add(grpParams);
             Controls.Add(btnRunExperiment01);
             Controls.Add(btnResetDefaults);
+            Controls.Add(btnOpenNotepad);
+            Controls.Add(btnOpenSpreadsheet);
             Controls.Add(lblStatus);
             Controls.Add(lblSummaryTitle);
             Controls.Add(txtSummary);
@@ -294,6 +318,8 @@ namespace gaia_v02
         private System.Windows.Forms.NumericUpDown nudCellDeltaR, nudCellDeltaZ, nudMinStars, nudTimeoutMinutes;
         private System.Windows.Forms.Button btnRunExperiment01;
         private System.Windows.Forms.Button btnResetDefaults;
+        private System.Windows.Forms.Button btnOpenNotepad;
+        private System.Windows.Forms.Button btnOpenSpreadsheet;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblSummaryTitle;
         private System.Windows.Forms.TextBox txtSummary;
