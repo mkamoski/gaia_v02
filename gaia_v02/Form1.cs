@@ -98,6 +98,43 @@ public partial class Form1 : Form
         lblStatus.ForeColor = SystemColors.GrayText;
     }
 
+    private void BtnReadme_Click(object? sender, EventArgs e)
+    {
+        try
+        {
+            string readmePath = Path.Combine(AppContext.BaseDirectory, "README.md");
+            if (!File.Exists(readmePath))
+            {
+                // Fall back to the repository root README when running from the build output directory.
+                string? dir = AppContext.BaseDirectory;
+                readmePath = string.Empty;
+                for (int i = 0; i < 6 && dir is not null; i++)
+                {
+                    string candidate = Path.Combine(dir, "README.md");
+                    if (File.Exists(candidate))
+                    {
+                        readmePath = candidate;
+                        break;
+                    }
+                    dir = Path.GetDirectoryName(dir);
+                }
+            }
+
+            if (string.IsNullOrEmpty(readmePath) || !File.Exists(readmePath))
+            {
+                MessageBox.Show("README.md could not be found.", "Open README", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var psi = new ProcessStartInfo("notepad.exe") { Arguments = $"\"{readmePath}\"", UseShellExecute = true };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to open README: {ex.Message}", "Open README", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
     private void BtnOpenNotepad_Click(object? sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(_lastCsvPath) || !File.Exists(_lastCsvPath))

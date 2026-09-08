@@ -29,6 +29,7 @@ namespace gaia_v02
             grpParams = new System.Windows.Forms.GroupBox();
             btnRunExperiment01 = new System.Windows.Forms.Button();
             btnResetDefaults = new System.Windows.Forms.Button();
+            btnReadme = new System.Windows.Forms.Button();
             lblStatus = new System.Windows.Forms.Label();
             lblSummaryTitle = new System.Windows.Forms.Label();
             txtSummary = new System.Windows.Forms.TextBox();
@@ -242,8 +243,13 @@ namespace gaia_v02
             btnResetDefaults.Text = "↺  Reset Defaults";
             btnResetDefaults.Click += BtnResetDefaults_Click;
 
-            lblStatus.Location = new System.Drawing.Point(404, grpParams.Bottom + 18);
-            lblStatus.Size = new System.Drawing.Size(480, 22);
+            btnReadme.Location = new System.Drawing.Point(392, grpParams.Bottom + 12);
+            btnReadme.Size = new System.Drawing.Size(110, 34);
+            btnReadme.Text = "README";
+            btnReadme.Click += BtnReadme_Click;
+
+            lblStatus.Location = new System.Drawing.Point(512, grpParams.Bottom + 18);
+            lblStatus.Size = new System.Drawing.Size(372, 22);
             lblStatus.Text = "Ready. Set parameters above, then click Run.";
             lblStatus.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
@@ -296,6 +302,7 @@ namespace gaia_v02
             Controls.Add(grpParams);
             Controls.Add(btnRunExperiment01);
             Controls.Add(btnResetDefaults);
+            Controls.Add(btnReadme);
             Controls.Add(btnOpenNotepad);
             Controls.Add(btnOpenSpreadsheet);
             Controls.Add(lblStatus);
@@ -318,6 +325,7 @@ namespace gaia_v02
         private System.Windows.Forms.NumericUpDown nudCellDeltaR, nudCellDeltaZ, nudMinStars, nudTimeoutMinutes;
         private System.Windows.Forms.Button btnRunExperiment01;
         private System.Windows.Forms.Button btnResetDefaults;
+        private System.Windows.Forms.Button btnReadme;
         private System.Windows.Forms.Button btnOpenNotepad;
         private System.Windows.Forms.Button btnOpenSpreadsheet;
         private System.Windows.Forms.Label lblStatus;

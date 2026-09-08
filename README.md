@@ -31,27 +31,120 @@ High-level algorithm (Experiment01)
 
 4. Save per-cell results into a CSV file and present a summary in the UI.
 
+### Pseudocode overview
+
+```
+GenerateStars(N):
+    for i in 1..N:
+        R    = clamp(R0 + Exponential(hR) - hR, min=0.5)
+        Z    = Laplace(0, hZ)
+        VR   = Normal(0,      sigmaR)
+        VZ   = Normal(0,      sigmaZ)
+        VPhi = Normal(V_LSR,  sigmaPhi)
+    return stars
+
+BinIntoCells(stars):
+    for s in stars:
+        iR = floor(s.R / deltaR)
+        iZ = floor(s.Z / deltaZ)
+        cells[(iR, iZ)].add(s)
+    return cells
+
+ComputeDispersions(cells):
+    for (iR, iZ), list in cells:
+        if len(list) < MinStarsPerCell: continue
+        sigmaR = stddev(list.VR)
+        sigmaZ = stddev(list.VZ)
+        ratio  = sigmaR / sigmaZ
+        passes = |ratio - ExpectedRatio| <= RatioTolerance
+        emit CellResult(cellR, cellZ, N, sigmaR, sigmaZ, ratio, passes)
+```
+
 Sampling and math details
 -------------------------
-- Gaussian (normal) sampling: the implementation uses Box–Muller transform. Given two independent uniform(0,1) samples u1,u2, a standard normal variate z is computed by
 
-  z = sqrt(-2 ln u1) * cos(2π u2)
+### Coordinate system
 
-  The code returns mean + sigma * z.
+Stars are represented in cylindrical galactocentric coordinates via `StarPhaseSpace`:
+- R — galactocentric radius [kpc]
+- Z — height above the galactic midplane [kpc]
+- VR, VZ, VPhi — radial, vertical, and azimuthal velocity components [km/s]
 
-- Exponential sampling (inverse CDF): for scale λ (mean = scale), sample u ~ Uniform(0,1) and return -scale * ln(1 − u).
+This is a standard simplification used in Galactic dynamics: instead of full 6D (x, y, z, vx, vy, vz) Cartesian phase space, the axisymmetric cylindrical representation (R, Z, VR, VZ, VPhi) is used because the synthetic model assumes axisymmetry (no dependence on the azimuthal angle φ itself, only on R and Z).
 
-- Laplace sampling (double-exponential): the code uses the inverse CDF approach. For u ~ Uniform(0,1) shifted to (-0.5, +0.5):
+### Radial density profile — exponential disk
 
-  x = -scale * sign(u) * ln(1 − 2|u|)
+Real disk galaxies (including the Milky Way) have surface/volume density profiles that fall off approximately exponentially with radius:
 
-- Standard deviation calculation: the pipeline computes the (population) standard deviation per cell using
+  ρ(R) ∝ exp(−R / hR)
 
-  mean = (1/N) ∑ xi
-  variance = (1/N) ∑ (xi − mean)^2
+where hR is the radial scale length (`ScaleHeightR`, default 2.5 kpc). To draw R-offsets consistent with this profile, the code samples from an Exponential(scale = hR) distribution and re-centers it about R0 (the Solar radius):
+
+  R = R0 + Exponential(hR) − hR
+
+using inverse-CDF sampling (see below). The result is clamped to a minimum of 0.5 kpc to avoid unphysical radii near/at the galactic center.
+
+### Vertical density profile — Laplace (double-exponential) disk
+
+The vertical stellar density of a thin/thick galactic disk is commonly modeled as (double-sided) exponential in |Z|:
+
+  ρ(Z) ∝ exp(−|Z| / hZ)
+
+This is exactly the Laplace distribution with scale hZ (`ScaleHeightZ`, default 0.3 kpc), so Z is drawn directly from Laplace(0, hZ).
+
+### Velocity distributions — Schwarzschild (Gaussian) velocity ellipsoid
+
+Local stellar velocities in the solar neighborhood are well approximated, to first order, by independent Gaussians in each cylindrical velocity component — the classical "Schwarzschild velocity ellipsoid" approximation:
+
+  VR   ~ N(0,     σR²)
+  VZ   ~ N(0,     σZ²)
+  VPhi ~ N(V_LSR, σPhi²)
+
+VPhi is centered on the Local Standard of Rest circular speed `V_LSR` (default 220 km/s), while VR and VZ are centered on zero (no net radial/vertical streaming motion in this simplified model).
+
+### Why σR/σZ ≈ 1.93 is physically expected
+
+In a Milky Way–like disk in near-equilibrium, the vertical and radial velocity dispersions are linked (approximately) through the epicyclic approximation and the disk's vertical/radial force balance. Empirically and in dynamical disk models, the ratio σR/σZ for the thin/thick disk populations is observed to cluster around ~1.8–2.0, commonly cited near 1.93 for the solar neighborhood. `ExpectedRatio` (default 1.93) and `RatioTolerance` (default 0.15) encode this empirical/theoretical expectation so the experiment can flag which spatial cells are "dynamically consistent" with a relaxed exponential disk.
+
+### Random variate generation
+
+**Gaussian (normal) sampling — Box–Muller transform.**
+Given two independent uniform(0,1) samples u1, u2 (with u1, u2 ∈ (0,1], avoiding exact 0 to prevent `ln(0)`), a standard normal variate z is computed by:
+
+  z = sqrt(−2 ln u1) · cos(2π u2)
+
+This is the polar (trigonometric) form of the Box–Muller transform, which converts two independent uniform samples into one standard normal deviate exactly (in the ideal, infinite-precision case), by exploiting the fact that if (X, Y) are i.i.d. standard normal, then R² = X² + Y² is Exponential(2) and θ = atan2(Y, X) is Uniform(0, 2π); inverting this relationship yields the formula above. The code returns `mean + sigma * z`.
+
+**Exponential sampling — inverse CDF.**
+The exponential distribution's CDF is F(x) = 1 − exp(−x/scale). Setting u = F(x) and solving for x (inverse-CDF / inverse-transform sampling) gives:
+
+  x = −scale · ln(1 − u),  u ~ Uniform(0,1)
+
+**Laplace sampling — inverse CDF.**
+The Laplace (double exponential) distribution is symmetric exponential decay on both sides of zero. Using u shifted into (−0.5, +0.5), the inverse CDF is:
+
+  x = −scale · sign(u) · ln(1 − 2|u|)
+
+This produces a value that decays exponentially in |x| with scale `scale`, matching ρ(Z) ∝ exp(−|Z|/hZ) above.
+
+### Dispersion (standard deviation) calculation
+
+For each spatial cell, the pipeline computes the *population* standard deviation of a velocity component x (VR or VZ) over the N stars in that cell:
+
+  mean = (1/N) ∑ᵢ xᵢ
+  variance = (1/N) ∑ᵢ (xᵢ − mean)²
   σ = sqrt(variance)
 
-  Note: this uses the population denominator N (not N−1). This is consistent across cells in the current code.
+Note: this uses the population denominator N (not the Bessel-corrected N−1), which slightly underestimates the true dispersion for small N. This is consistent across all cells in the current code, so cell-to-cell comparisons remain valid, but absolute σ values are biased low, especially for cells near `MinStarsPerCell`.
+
+### Ratio test
+
+For each qualifying cell (N ≥ MinStarsPerCell):
+
+  Ratio = σR / σZ   (NaN if σZ == 0)
+  PassesCheck = |Ratio − ExpectedRatio| ≤ RatioTolerance
+
+This is a simple symmetric-tolerance band test (not a statistical significance test); it does not account for the sampling uncertainty of σR/σZ, which itself depends on N (smaller cells have noisier ratio estimates).
 
 CSV output
 ----------
@@ -98,6 +191,7 @@ Notes and potential improvements
 -------------------------------
 - Consider using streaming / chunked processing to reduce peak memory if StarCount is extremely large.
 - If you want unbiased sample standard deviations for small N, use the sample variance (divide by N−1) instead of N.
+- The ratio pass/fail check uses a fixed tolerance band and ignores the sampling uncertainty of σR/σZ, which scales roughly as O(1/√N); consider weighting cells by N or using a statistical test (e.g., an F-test on variances) for a more rigorous check.
 - Add parallelism: generation and binning are mostly embarrassingly parallel and could be parallelized (careful with RNG concurrency and dictionary concurrency).
 - Consider using more realistic galactic kinematic models (non-gaussian tails, radial dependence in dispersions, or correlations between velocity components) for advanced studies.
 
