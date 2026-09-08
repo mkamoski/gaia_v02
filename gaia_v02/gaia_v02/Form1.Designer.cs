@@ -22,7 +22,7 @@ namespace gaia_v02
 
         #region Windows Form Designer generated code
 
-        private void InitializeComponent()
+        private void InitializeComponentEx()
         {
             components = new System.ComponentModel.Container();
 
@@ -252,13 +252,13 @@ namespace gaia_v02
             btnOpenSpreadsheet = new System.Windows.Forms.Button();
             btnOpenNotepad.Location = new System.Drawing.Point(900, grpParams.Bottom + 12);
             btnOpenNotepad.Size = new System.Drawing.Size(110, 34);
-            btnOpenNotepad.Text = "Open (Notepad)";
+            btnOpenNotepad.Text = "Notepad";
             btnOpenNotepad.Click += BtnOpenNotepad_Click;
             btnOpenNotepad.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             btnOpenSpreadsheet.Location = new System.Drawing.Point(768, grpParams.Bottom + 12);
             btnOpenSpreadsheet.Size = new System.Drawing.Size(120, 34);
-            btnOpenSpreadsheet.Text = "Open (Spreadsheet)";
+            btnOpenSpreadsheet.Text = "Sheet";
             btnOpenSpreadsheet.Click += BtnOpenSpreadsheet_Click;
             btnOpenSpreadsheet.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 

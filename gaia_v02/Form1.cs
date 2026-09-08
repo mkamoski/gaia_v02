@@ -11,6 +11,7 @@ public partial class Form1 : Form
     public Form1()
     {
         InitializeComponent();
+        InitializeComponentEx();
     }
 
     // -----------------------------------------------------------------------
@@ -20,13 +21,13 @@ public partial class Form1 : Form
     private async void BtnRunExperiment01_Click(object sender, EventArgs e)
     {
         btnRunExperiment01.Enabled = false;
-        btnResetDefaults.Enabled   = false;
+        btnResetDefaults.Enabled = false;
         txtSummary.Clear();
         txtCsv.Clear();
 
         var p = ReadParameters();
         var timeout = TimeSpan.FromMinutes((double)p.TimeoutMinutes);
-        lblStatus.Text      = $"Running Experiment 01… (timeout {p.TimeoutMinutes} min)";
+        lblStatus.Text = $"Running Experiment 01… (timeout {p.TimeoutMinutes} min)";
         lblStatus.ForeColor = Color.DarkOrange;
 
         using var cts = new CancellationTokenSource(timeout);
@@ -45,55 +46,55 @@ public partial class Form1 : Form
 
             // Populate output boxes
             txtSummary.Text = BuildSummary(result, csvPath);
-            txtCsv.Text     = string.Join(Environment.NewLine, result.CsvLines);
+            txtCsv.Text = string.Join(Environment.NewLine, result.CsvLines);
 
             // remember CSV path for open buttons
             _lastCsvPath = csvPath;
             btnOpenNotepad.Enabled = true;
             btnOpenSpreadsheet.Enabled = true;
 
-            lblStatus.Text      = $"Done – {result.QualCells} cells analysed, CSV saved to {Path.GetFileName(csvPath)}";
+            lblStatus.Text = $"Done – {result.QualCells} cells analysed, CSV saved to {Path.GetFileName(csvPath)}";
             lblStatus.ForeColor = Color.DarkGreen;
         }
         catch (OperationCanceledException)
         {
-            lblStatus.Text      = $"Experiment 01 timed out after {p.TimeoutMinutes} minutes.";
+            lblStatus.Text = $"Experiment 01 timed out after {p.TimeoutMinutes} minutes.";
             lblStatus.ForeColor = Color.Firebrick;
-            txtSummary.Text     = $"[TIMEOUT] Experiment was cancelled after {p.TimeoutMinutes} minutes.\r\n" +
+            txtSummary.Text = $"[TIMEOUT] Experiment was cancelled after {p.TimeoutMinutes} minutes.\r\n" +
                                    "Consider reducing Star Count or increasing cell sizes to finish faster.";
         }
         catch (Exception ex)
         {
-            lblStatus.Text      = "Error – see summary box.";
+            lblStatus.Text = "Error – see summary box.";
             lblStatus.ForeColor = Color.Firebrick;
-            txtSummary.Text     = $"[ERROR] {ex.GetType().Name}: {ex.Message}\r\n\r\n{ex.StackTrace}";
+            txtSummary.Text = $"[ERROR] {ex.GetType().Name}: {ex.Message}\r\n\r\n{ex.StackTrace}";
         }
         finally
         {
             btnRunExperiment01.Enabled = true;
-            btnResetDefaults.Enabled   = true;
+            btnResetDefaults.Enabled = true;
         }
     }
 
     private void BtnResetDefaults_Click(object sender, EventArgs e)
     {
         var d = Experiment01Parameters.Default;
-        nudStarCount.Value      = d.StarCount;
-        nudR0.Value             = (decimal)d.R0;
-        nudSigmaR.Value         = (decimal)d.SigmaR;
-        nudSigmaZ.Value         = (decimal)d.SigmaZ;
-        nudSigmaPhi.Value       = (decimal)d.SigmaPhi;
-        nudVLSR.Value           = (decimal)d.V_LSR;
-        nudScaleHeightR.Value   = (decimal)d.ScaleHeightR;
-        nudScaleHeightZ.Value   = (decimal)d.ScaleHeightZ;
-        nudExpectedRatio.Value  = (decimal)d.ExpectedRatio;
+        nudStarCount.Value = d.StarCount;
+        nudR0.Value = (decimal)d.R0;
+        nudSigmaR.Value = (decimal)d.SigmaR;
+        nudSigmaZ.Value = (decimal)d.SigmaZ;
+        nudSigmaPhi.Value = (decimal)d.SigmaPhi;
+        nudVLSR.Value = (decimal)d.V_LSR;
+        nudScaleHeightR.Value = (decimal)d.ScaleHeightR;
+        nudScaleHeightZ.Value = (decimal)d.ScaleHeightZ;
+        nudExpectedRatio.Value = (decimal)d.ExpectedRatio;
         nudRatioTolerance.Value = (decimal)d.RatioTolerance;
-        nudCellDeltaR.Value     = (decimal)d.CellDeltaR;
-        nudCellDeltaZ.Value     = (decimal)d.CellDeltaZ;
-        nudMinStars.Value       = d.MinStarsPerCell;
+        nudCellDeltaR.Value = (decimal)d.CellDeltaR;
+        nudCellDeltaZ.Value = (decimal)d.CellDeltaZ;
+        nudMinStars.Value = d.MinStarsPerCell;
         nudTimeoutMinutes.Value = d.TimeoutMinutes;
 
-        lblStatus.Text      = "Parameters reset to defaults.";
+        lblStatus.Text = "Parameters reset to defaults.";
         lblStatus.ForeColor = SystemColors.GrayText;
     }
 
@@ -160,20 +161,20 @@ public partial class Form1 : Form
     // -----------------------------------------------------------------------
 
     private Experiment01Parameters ReadParameters() => new(
-        StarCount      : (int)nudStarCount.Value,
-        R0             : (double)nudR0.Value,
-        SigmaR         : (double)nudSigmaR.Value,
-        SigmaZ         : (double)nudSigmaZ.Value,
-        SigmaPhi       : (double)nudSigmaPhi.Value,
-        V_LSR          : (double)nudVLSR.Value,
-        ScaleHeightR   : (double)nudScaleHeightR.Value,
-        ScaleHeightZ   : (double)nudScaleHeightZ.Value,
-        ExpectedRatio  : (double)nudExpectedRatio.Value,
-        RatioTolerance : (double)nudRatioTolerance.Value,
-        CellDeltaR     : (double)nudCellDeltaR.Value,
-        CellDeltaZ     : (double)nudCellDeltaZ.Value,
+        StarCount: (int)nudStarCount.Value,
+        R0: (double)nudR0.Value,
+        SigmaR: (double)nudSigmaR.Value,
+        SigmaZ: (double)nudSigmaZ.Value,
+        SigmaPhi: (double)nudSigmaPhi.Value,
+        V_LSR: (double)nudVLSR.Value,
+        ScaleHeightR: (double)nudScaleHeightR.Value,
+        ScaleHeightZ: (double)nudScaleHeightZ.Value,
+        ExpectedRatio: (double)nudExpectedRatio.Value,
+        RatioTolerance: (double)nudRatioTolerance.Value,
+        CellDeltaR: (double)nudCellDeltaR.Value,
+        CellDeltaZ: (double)nudCellDeltaZ.Value,
         MinStarsPerCell: (int)nudMinStars.Value,
-        TimeoutMinutes : (int)nudTimeoutMinutes.Value);
+        TimeoutMinutes: (int)nudTimeoutMinutes.Value);
 
     // -----------------------------------------------------------------------
     // Summary + insights builder
@@ -181,10 +182,10 @@ public partial class Form1 : Form
 
     private static string BuildSummary(ExperimentResult r, string csvPath)
     {
-        var p  = r.Parameters;
+        var p = r.Parameters;
         var sb = new StringBuilder();
 
-        const string Sep  = "═══════════════════════════════════════════════════════════════════";
+        const string Sep = "═══════════════════════════════════════════════════════════════════";
         const string Sep2 = "───────────────────────────────────────────────────────────────────";
 
         sb.AppendLine(Sep);
@@ -195,27 +196,27 @@ public partial class Form1 : Form
         // --- Parameters used ---
         sb.AppendLine("PARAMETERS USED");
         sb.AppendLine(Sep2);
-        AppendParam(sb, "Star Count",              $"{p.StarCount:N0}");
+        AppendParam(sb, "Star Count", $"{p.StarCount:N0}");
         AppendParam(sb, "R₀ (Solar galactocentric radius)", $"{p.R0:F2} kpc");
-        AppendParam(sb, "σR (Radial dispersion input)",     $"{p.SigmaR:F1} km/s");
-        AppendParam(sb, "σZ (Vertical dispersion input)",   $"{p.SigmaZ:F1} km/s");
-        AppendParam(sb, "σΦ (Azimuthal dispersion input)",  $"{p.SigmaPhi:F1} km/s");
-        AppendParam(sb, "V_LSR",                            $"{p.V_LSR:F1} km/s");
-        AppendParam(sb, "Scale Height R",                   $"{p.ScaleHeightR:F2} kpc");
-        AppendParam(sb, "Scale Height Z",                   $"{p.ScaleHeightZ:F3} kpc");
-        AppendParam(sb, "Expected σR/σZ Ratio",             $"{p.ExpectedRatio:F3}");
-        AppendParam(sb, "Ratio Tolerance (±)",              $"{p.RatioTolerance:F3}");
-        AppendParam(sb, "Cell ΔR",                          $"{p.CellDeltaR:F3} kpc");
-        AppendParam(sb, "Cell ΔZ",                          $"{p.CellDeltaZ:F3} kpc");
-        AppendParam(sb, "Min Stars / Cell",                 $"{p.MinStarsPerCell}");
-        AppendParam(sb, "Timeout",                          $"{p.TimeoutMinutes} min");
+        AppendParam(sb, "σR (Radial dispersion input)", $"{p.SigmaR:F1} km/s");
+        AppendParam(sb, "σZ (Vertical dispersion input)", $"{p.SigmaZ:F1} km/s");
+        AppendParam(sb, "σΦ (Azimuthal dispersion input)", $"{p.SigmaPhi:F1} km/s");
+        AppendParam(sb, "V_LSR", $"{p.V_LSR:F1} km/s");
+        AppendParam(sb, "Scale Height R", $"{p.ScaleHeightR:F2} kpc");
+        AppendParam(sb, "Scale Height Z", $"{p.ScaleHeightZ:F3} kpc");
+        AppendParam(sb, "Expected σR/σZ Ratio", $"{p.ExpectedRatio:F3}");
+        AppendParam(sb, "Ratio Tolerance (±)", $"{p.RatioTolerance:F3}");
+        AppendParam(sb, "Cell ΔR", $"{p.CellDeltaR:F3} kpc");
+        AppendParam(sb, "Cell ΔZ", $"{p.CellDeltaZ:F3} kpc");
+        AppendParam(sb, "Min Stars / Cell", $"{p.MinStarsPerCell}");
+        AppendParam(sb, "Timeout", $"{p.TimeoutMinutes} min");
         sb.AppendLine();
 
         // --- Timing ---
         sb.AppendLine("TIMING");
         sb.AppendLine(Sep2);
-        AppendParam(sb, "Start",   $"{r.StartTime:yyyy-MM-dd HH:mm:ss.fff}");
-        AppendParam(sb, "End",     $"{r.EndTime:yyyy-MM-dd HH:mm:ss.fff}");
+        AppendParam(sb, "Start", $"{r.StartTime:yyyy-MM-dd HH:mm:ss.fff}");
+        AppendParam(sb, "End", $"{r.EndTime:yyyy-MM-dd HH:mm:ss.fff}");
         AppendParam(sb, "Elapsed", $"{r.Elapsed:hh\\:mm\\:ss\\.fff}");
         sb.AppendLine();
 
@@ -226,17 +227,17 @@ public partial class Form1 : Form
 
         sb.AppendLine("RESULTS");
         sb.AppendLine(Sep2);
-        AppendParam(sb, "Stars generated",          $"{p.StarCount:N0}");
-        AppendParam(sb, "Raw spatial cells",        $"{r.TotalRawCells:N0}");
+        AppendParam(sb, "Stars generated", $"{p.StarCount:N0}");
+        AppendParam(sb, "Raw spatial cells", $"{r.TotalRawCells:N0}");
         AppendParam(sb, "Qualifying cells (N≥min)", $"{r.QualCells:N0}");
         AppendParam(sb, "Cells passing ratio test", $"{r.PassingCells:N0}  /  {r.QualCells:N0}  ({passPct:F1}%)");
-        AppendParam(sb, "Mean measured σR/σZ",      $"{r.MeanRatio:F4}  (expected {p.ExpectedRatio:F3})");
-        AppendParam(sb, "Std  σR/σZ",               $"{r.StdRatio:F4}");
-        AppendParam(sb, "Min  σR/σZ",               $"{r.MinRatio:F4}");
-        AppendParam(sb, "Max  σR/σZ",               $"{r.MaxRatio:F4}");
-        AppendParam(sb, "Mean σR (measured)",        $"{r.MeanSigmaR:F2} km/s  (input {p.SigmaR:F1} km/s)");
-        AppendParam(sb, "Mean σZ (measured)",        $"{r.MeanSigmaZ:F2} km/s  (input {p.SigmaZ:F1} km/s)");
-        AppendParam(sb, "CSV file",                  csvPath);
+        AppendParam(sb, "Mean measured σR/σZ", $"{r.MeanRatio:F4}  (expected {p.ExpectedRatio:F3})");
+        AppendParam(sb, "Std  σR/σZ", $"{r.StdRatio:F4}");
+        AppendParam(sb, "Min  σR/σZ", $"{r.MinRatio:F4}");
+        AppendParam(sb, "Max  σR/σZ", $"{r.MaxRatio:F4}");
+        AppendParam(sb, "Mean σR (measured)", $"{r.MeanSigmaR:F2} km/s  (input {p.SigmaR:F1} km/s)");
+        AppendParam(sb, "Mean σZ (measured)", $"{r.MeanSigmaZ:F2} km/s  (input {p.SigmaZ:F1} km/s)");
+        AppendParam(sb, "CSV file", csvPath);
         sb.AppendLine();
 
         // --- Insights ---
@@ -247,9 +248,9 @@ public partial class Form1 : Form
         if (!double.IsNaN(r.MeanRatio))
         {
             string direction = ratioBias >= 0 ? "above" : "below";
-            string quality   = ratioBiasPct < 1.0  ? "excellent (< 1%)" :
-                               ratioBiasPct < 3.0  ? "good (< 3%)"      :
-                               ratioBiasPct < 5.0  ? "fair (< 5%)"      : "poor (≥ 5%)";
+            string quality = ratioBiasPct < 1.0 ? "excellent (< 1%)" :
+                               ratioBiasPct < 3.0 ? "good (< 3%)" :
+                               ratioBiasPct < 5.0 ? "fair (< 5%)" : "poor (≥ 5%)";
 
             sb.AppendLine($"  [Ratio accuracy – {quality}]");
             sb.AppendLine($"    The mean measured σR/σZ = {r.MeanRatio:F4} is {Math.Abs(ratioBias):F4} ({ratioBiasPct:F2}%)");
@@ -304,8 +305,31 @@ public partial class Form1 : Form
         return sb.ToString();
     }
 
+    private void InitializeComponent()
+    {
+        SuspendLayout();
+        // 
+        // Form1
+        // 
+        ClientSize = new Size(1002, 712);
+        MinimumSize = new Size(1024, 768);
+        Name = "Form1";
+        SizeGripStyle = SizeGripStyle.Show;
+        StartPosition = FormStartPosition.CenterScreen;
+        WindowState = FormWindowState.Maximized;
+        Load += Form1_Load;
+        ResumeLayout(false);
+
+    }
+
     private static void AppendParam(StringBuilder sb, string name, string value)
         => sb.AppendLine($"  {name,-38}: {value}");
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+       this.WindowState= FormWindowState.Maximized;
+    }
+
 }
 
 
