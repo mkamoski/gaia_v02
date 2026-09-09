@@ -20,8 +20,16 @@ try {
 		robocopy "$PublishDir" "$temp\publish" /MIR | Out-Null
 	}
 
-	$zipName = "Gaia_v02_${Configuration}_${TargetFramework}_$timestamp.zip"
+	# Use a static filename (no timestamp) so this artifact overwrites cleanly in source control,
+	# letting Git's history track each build instead of accumulating multiple zip files on disk.
+	$zipName = "Gaia_v02_${Configuration}_${TargetFramework}.zip"
 	$zip = Join-Path $ArtifactsDir $zipName
+
+	# Cleanup: remove any previously produced artifact zips so only the latest packaging is kept.
+	Get-ChildItem -Path $ArtifactsDir -Filter 'Gaia_v02_*.zip' -File -ErrorAction SilentlyContinue |
+		Where-Object { $_.FullName -ne $zip } |
+		Remove-Item -Force
+
 	if (Test-Path $zip) { Remove-Item $zip -Force }
 
 	Compress-Archive -Path (Join-Path $temp '*') -DestinationPath $zip -Force

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <None Include="gaia_v02.slnx" />
+    <None Include="README.md" />
+    <None Include="create_artifact_zip.ps1" />
   </ItemGroup>
 
   <!-- Create a self-contained ZIP with source + published EXE after every build (Windows only).
@@ -30,11 +32,13 @@
     <Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c $(Configuration) -r $(_PublishRid) --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:_IsCreatingArtifactZip=true -o &quot;$(_PublishDir)&quot;" />
 
     <!-- Build a timestamped ZIP containing 'publish' and 'source' folders by calling a script -->
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\build\create_artifact_zip.ps1&quot; -ArtifactsDir &quot;$(_ArtifactsDir)&quot; -PublishDir &quot;$(_PublishDir)&quot; -ProjectDir &quot;$(MSBuildProjectDirectory)&quot; -Configuration &quot;$(Configuration)&quot; -TargetFramework &quot;$(TargetFramework)&quot;" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\create_artifact_zip.ps1&quot; -ArtifactsDir &quot;$(_ArtifactsDir)&quot; -PublishDir &quot;$(_PublishDir)&quot; -ProjectDir &quot;$(MSBuildProjectDirectory)&quot; -Configuration &quot;$(Configuration)&quot; -TargetFramework &quot;$(TargetFramework)&quot;" />
 
-    <!-- Expose the created ZIP as an output item so other targets/tools can find it -->
+    <!-- Expose the created ZIP as an output item so other targets/tools can find it.
+         The filename is static (no timestamp) so it overwrites in place; check the zip into
+         source control and let Git track its version history across builds. -->
     <ItemGroup>
-      <BuiltArtifact Include="$(_ArtifactsDir)\Gaia_v02_$(Configuration)_$(TargetFramework)_*.zip" />
+      <BuiltArtifact Include="$(_ArtifactsDir)\Gaia_v02_$(Configuration)_$(TargetFramework).zip" />
     </ItemGroup>
   </Target>
 
