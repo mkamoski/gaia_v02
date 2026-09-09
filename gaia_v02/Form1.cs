@@ -362,7 +362,7 @@ public partial class Form1 : Form
     private static void AppendParam(StringBuilder sb, string name, string value)
         => sb.AppendLine($"  {name,-38}: {value}");
 
-    private void Form1_Load(object sender, EventArgs e)
+    private void Form1_Load(object? sender, EventArgs e)
     {
        this.WindowState= FormWindowState.Maximized;
     }
