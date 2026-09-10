@@ -20,6 +20,18 @@ namespace gaia_v02
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Draws a 1px black border around the sender control's client area, regardless of the
+        /// current Windows theme's default border color.
+        /// </summary>
+        private static void DrawBlackBorder(object? sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            if (sender is not System.Windows.Forms.Control control) return;
+            var rect = new System.Drawing.Rectangle(0, 0, control.ClientSize.Width - 1, control.ClientSize.Height - 1);
+            using var pen = new System.Drawing.Pen(System.Drawing.Color.Black, 1);
+            e.Graphics.DrawRectangle(pen, rect);
+        }
+
         #region Windows Form Designer generated code
 
         private void InitializeComponentEx()
@@ -32,9 +44,12 @@ namespace gaia_v02
             btnReadme = new System.Windows.Forms.Button();
             lblStatus = new System.Windows.Forms.Label();
             lblSummaryTitle = new System.Windows.Forms.Label();
+            pnlSummaryBorder = new System.Windows.Forms.Panel();
             txtSummary = new System.Windows.Forms.TextBox();
             lblCsvTitle = new System.Windows.Forms.Label();
+            pnlCsvBorder = new System.Windows.Forms.Panel();
             txtCsv = new System.Windows.Forms.TextBox();
+
 
             lblStarCount = new System.Windows.Forms.Label();
             lblR0 = new System.Windows.Forms.Label();
@@ -274,24 +289,41 @@ namespace gaia_v02
             lblSummaryTitle.Text = "Experiment Summary & Insights:";
             lblSummaryTitle.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
-            txtSummary.Location = new System.Drawing.Point(12, lblSummaryTitle.Bottom + 6);
-            txtSummary.Size = new System.Drawing.Size(1000, 180);
+            // pnlSummaryBorder hosts txtSummary and paints a 1px black border around it
+            // (native TextBox controls don't reliably raise Paint, so a bordered host panel is used instead).
+            pnlSummaryBorder.Location = new System.Drawing.Point(12, lblSummaryTitle.Bottom + 6);
+            pnlSummaryBorder.Size = new System.Drawing.Size(1000, 180);
+            pnlSummaryBorder.BackColor = System.Drawing.Color.Black;
+            pnlSummaryBorder.Padding = new System.Windows.Forms.Padding(1);
+            pnlSummaryBorder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            txtSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             txtSummary.Multiline = true;
             txtSummary.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             txtSummary.ReadOnly = true;
-            txtSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtSummary.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            pnlSummaryBorder.Controls.Add(txtSummary);
 
 
             // CSV box
-            lblCsvTitle.Location = new System.Drawing.Point(12, 516);
+            lblCsvTitle.Location = new System.Drawing.Point(12, pnlSummaryBorder.Bottom + 12);
             lblCsvTitle.Size = new System.Drawing.Size(500, 18);
             lblCsvTitle.Text = "CSV Output (also saved to file):";
 
-            txtCsv.Location = new System.Drawing.Point(12, 536);
-            txtCsv.Size = new System.Drawing.Size(1126, 362);
+            // pnlCsvBorder hosts txtCsv and paints a 1px black border around it.
+            // Height reduced ~10% further (290 -> 261) so the label above is no longer clipped.
+            pnlCsvBorder.Location = new System.Drawing.Point(12, lblCsvTitle.Bottom + 6);
+            pnlCsvBorder.Size = new System.Drawing.Size(1126, 261);
+            pnlCsvBorder.BackColor = System.Drawing.Color.Black;
+            pnlCsvBorder.Padding = new System.Windows.Forms.Padding(1);
+            pnlCsvBorder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            txtCsv.Dock = System.Windows.Forms.DockStyle.Fill;
             txtCsv.Multiline = true;
             txtCsv.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             txtCsv.ReadOnly = true;
+            txtCsv.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            pnlCsvBorder.Controls.Add(txtCsv);
 
             // Form
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -307,9 +339,13 @@ namespace gaia_v02
             Controls.Add(btnOpenSpreadsheet);
             Controls.Add(lblStatus);
             Controls.Add(lblSummaryTitle);
-            Controls.Add(txtSummary);
+            Controls.Add(pnlSummaryBorder);
             Controls.Add(lblCsvTitle);
-            Controls.Add(txtCsv);
+            Controls.Add(pnlCsvBorder);
+
+            // 1px black border to make the parameter group box stand out visually.
+            // (txtSummary/txtCsv get their black borders from their host Panel's black background + padding.)
+            grpParams.Paint += DrawBlackBorder;
 
             ResumeLayout(false);
         }
@@ -330,8 +366,10 @@ namespace gaia_v02
         private System.Windows.Forms.Button btnOpenSpreadsheet;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblSummaryTitle;
+        private System.Windows.Forms.Panel pnlSummaryBorder;
         private System.Windows.Forms.TextBox txtSummary;
         private System.Windows.Forms.Label lblCsvTitle;
+        private System.Windows.Forms.Panel pnlCsvBorder;
         private System.Windows.Forms.TextBox txtCsv;
 
         #endregion

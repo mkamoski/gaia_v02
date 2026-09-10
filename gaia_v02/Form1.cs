@@ -102,23 +102,7 @@ public partial class Form1 : Form
     {
         try
         {
-            string readmePath = Path.Combine(AppContext.BaseDirectory, "README.md");
-            if (!File.Exists(readmePath))
-            {
-                // Fall back to the repository root README when running from the build output directory.
-                string? dir = AppContext.BaseDirectory;
-                readmePath = string.Empty;
-                for (int i = 0; i < 6 && dir is not null; i++)
-                {
-                    string candidate = Path.Combine(dir, "README.md");
-                    if (File.Exists(candidate))
-                    {
-                        readmePath = candidate;
-                        break;
-                    }
-                    dir = Path.GetDirectoryName(dir);
-                }
-            }
+            string? readmePath = FindReadme();
 
             if (string.IsNullOrEmpty(readmePath) || !File.Exists(readmePath))
             {
@@ -133,6 +117,34 @@ public partial class Form1 : Form
         {
             MessageBox.Show($"Failed to open README: {ex.Message}", "Open README", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private static string? FindReadme()
+    {
+        // Candidate starting points: the app's base directory, the running process's executable
+        // directory (may differ from AppContext.BaseDirectory for single-file publishes), and the CWD.
+        var startDirs = new List<string?>
+        {
+            AppContext.BaseDirectory,
+            Environment.ProcessPath is { } p ? Path.GetDirectoryName(p) : null,
+            Directory.GetCurrentDirectory(),
+        };
+
+        foreach (var start in startDirs)
+        {
+            string? dir = start;
+            for (int i = 0; i < 8 && dir is not null; i++)
+            {
+                string candidate = Path.Combine(dir, "README.md");
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+                dir = Path.GetDirectoryName(dir);
+            }
+        }
+
+        return null;
     }
 
     private void BtnOpenNotepad_Click(object? sender, EventArgs e)
